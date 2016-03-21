@@ -38,9 +38,9 @@
          timeslotsPerHour : 4,
          buttons : true,
          buttonText : {
-            today : "today",
-            lastWeek : "&nbsp;&lt;&nbsp;",
-            nextWeek : "&nbsp;&gt;&nbsp;"
+            today : "今天",
+            lastWeek : "上一周",
+            nextWeek : "下一周"
          },
          scrollToHourMillis : 500,
          allowCalEventOverlap : false,
@@ -78,10 +78,10 @@
          },
          noEvents : function() {
          },
-         shortMonths : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-         longMonths : ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
-         shortDays : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-         longDays : ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+         shortMonths : ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'],
+         longMonths : ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'],
+         shortDays : ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'],
+         longDays : ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六']
       },
 
       /***********************
@@ -139,6 +139,9 @@
       prevWeek : function() {
          //minus more than 1 day to be sure we're in previous week - account for daylight savings or other anomolies
          var newDate = new Date(this.element.data("startDate").getTime() - (MILLIS_IN_WEEK / 6));
+         if(this.options.daysToShow==1){
+           	newDate = new Date(this.element.data("startDate").getTime()-MILLIS_IN_DAY);
+          }
          this._clearCalendar();
          this._loadCalEvents(newDate);
       },
@@ -149,6 +152,12 @@
       nextWeek : function() {
          //add 8 days to be sure of being in prev week - allows for daylight savings or other anomolies
          var newDate = new Date(this.element.data("startDate").getTime() + MILLIS_IN_WEEK + (MILLIS_IN_WEEK / 7));
+        
+         if(this.options.daysToShow==1){
+              	newDate = new Date(this.element.data("startDate").getTime()+MILLIS_IN_DAY);
+         }
+         
+         
          this._clearCalendar();
          this._loadCalEvents(newDate);
       },
@@ -550,12 +559,18 @@
 
          var options = this.options;
          date = dateWithinWeek || options.date;
+         
          weekStartDate = self._dateFirstDayOfWeek(date);
+        
 
          weekEndDate = self._dateLastMilliOfWeek(date);
 
          options.calendarBeforeLoad(self.element);
 
+         if(options.daysToShow==1){
+        	 weekStartDate=new Date(date.getFullYear(), date.getMonth(), date.getDate());
+        	 weekEndDate=weekStartDate;
+         }
          self.element.data("startDate", weekStartDate);
          self.element.data("endDate", weekEndDate);
 
@@ -610,11 +625,14 @@
             currentDay = self._addDays(currentDay, 1);
 
          });
-
          currentDay = self._dateFirstDayOfWeek(self._cloneDate(self.element.data("startDate")));
 
-         $weekDayColumns.each(function(i, val) {
+        
+         if(options.daysToShow==1){
+             currentDay = self._cloneDate(self.element.data("startDate"));
+          }
 
+         $weekDayColumns.each(function(i, val) {
             $(this).data("startDate", self._cloneDate(currentDay));
             $(this).data("endDate", new Date(currentDay.getTime() + (MILLIS_IN_DAY)));
             if (self._isToday(currentDay)) {
@@ -1124,7 +1142,7 @@
       },
 
       _amOrPm : function (hourOfDay) {
-         return hourOfDay < 12 ? "AM" : "PM";
+         return hourOfDay < 12 ? "上午" : "下午";
       },
 
       _isToday : function(date) {
